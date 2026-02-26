@@ -1,671 +1,599 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-<meta charset="UTF-8" />\
-<title>Visual Processing Speed Task</title>\
-<meta name="viewport" content="width=device-width, initial-scale=1" />\
-<style>\
-:root \{\
-  --bg: #f4f7fb;\
-  --card: #ffffff;\
-  --border: #8b95a5;\
-  --accent: #6b8cff;\
-  --accent2: #5ec2b7;\
-  --text: #1f2933;\
-  --muted: #5f6c7b;\
-\}\
-body \{\
-  margin: 0; padding: 28px;\
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;\
-  background: var(--bg); color: var(--text);\
-  text-align: center;\
-\}\
-h2 \{ margin: 0 0 10px 0; \}\
-p \{ color: var(--muted); \}\
-button \{\
-  padding: 12px 18px; border-radius: 12px;\
-  border: none; font-size: 16px; cursor: pointer;\
-\}\
-.primary \{ background: var(--accent); color: #fff; \}\
-.secondary \{ background: var(--accent2); color: #fff; \}\
-button:hover \{ opacity: 0.92; \}\
-\
-.container \{ display: none; \}\
-\
-.hud \{\
-  display: flex; justify-content: space-between;\
-  max-width: 720px; margin: 0 auto; font-weight: 700;\
-\}\
-.row \{\
-  display: flex; justify-content: center; gap: 34px;\
-  margin: 22px 0;\
-\}\
-.card \{\
-  width: 250px; height: 250px;\
-  background: var(--card);\
-  border-radius: 18px;\
-  box-shadow: 0 10px 24px rgba(0,0,0,0.08);\
-  display: flex; justify-content: center; align-items: center;\
-  border: 2px solid var(--border);\
-\}\
-canvas \{ width: 210px; height: 210px; \}\
-\
-.key-hint \{ font-weight: 700; margin-top: 8px; \}\
-.controls \{\
-  display: flex; justify-content: center; gap: 16px;\
-  margin-top: 14px;\
-\}\
-.small \{\
-  font-size: 13px;\
-  color: var(--muted);\
-  max-width: 680px;\
-  margin: 10px auto 0 auto;\
-  line-height: 1.35;\
-\}\
-\
-.overlay \{\
-  position: fixed; inset: 0;\
-  background: rgba(31,41,51,0.62);\
-  display: none; justify-content: center; align-items: center;\
-  z-index: 999;\
-  touch-action: none;\
-\}\
-.overlay-box \{\
-  background: white;\
-  padding: 20px 20px;\
-  border-radius: 14px;\
-  width: 390px;\
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);\
-  border: 2px solid rgba(139,149,165,0.6);\
-  text-align: left;\
-\}\
-.tag \{\
-  display: inline-block;\
-  font-size: 12px;\
-  padding: 4px 8px;\
-  border-radius: 999px;\
-  background: rgba(107,140,255,0.12);\
-  color: #2743b6;\
-  margin-bottom: 10px;\
-\}\
-.fade \{ animation: fadeIn 0.10s ease-in; \}\
-@keyframes fadeIn \{ from \{ opacity: 0; \} to \{ opacity: 1; \} \}\
-\
-hr \{ border: none; border-top: 1px solid rgba(139,149,165,0.35); margin: 18px auto; max-width: 720px; \}\
-</style>\
-</head>\
-\
-<body>\
-<h2>Visual Processing Speed Task</h2>\
-\
-<div id="intro">\
-  <p>You will see two images side by side. Decide as quickly and accurately as possible whether they are the same or different.</p>\
-  <p class="small">\
-    <strong>How to respond:</strong><br>\
-    \'95 <strong>Keyboard:</strong> S = Same, D = Different<br>\
-    \'95 <strong>Touch:</strong> Swipe right = Same, Swipe left = Different<br>\
-    \'95 <strong>Buttons:</strong> Tap Same / Different\
-  </p>\
-  <p class="small">Brief on-screen messages may appear. Short breaks are built in. The task takes only a few minutes.</p>\
-  <button class="primary" onclick="startExperiment()">Start</button>\
-</div>\
-\
-<div id="task" class="container">\
-  <div class="hud">\
-    <div>\
-      <span id="phaseLabel">Block 1 \'97 Half A</span>\
-      <span style="font-weight:600;color:var(--muted)"> \'b7 </span>\
-      <span id="conditionLabel" style="font-weight:700;color:var(--muted)">Baseline</span>\
-    </div>\
-    <div>\uc0\u9201  <span id="timeLeft">45</span>s</div>\
-  </div>\
-\
-  <div class="row fade" id="stimRow">\
-    <div class="card"><canvas id="left" width="210" height="210"></canvas></div>\
-    <div class="card"><canvas id="right" width="210" height="210"></canvas></div>\
-  </div>\
-\
-  <p class="key-hint">Same or Different?</p>\
-  <div class="controls">\
-    <button class="secondary" id="btnSame" onclick="handleResponse(true)">Same</button>\
-    <button class="secondary" id="btnDiff" onclick="handleResponse(false)">Different</button>\
-  </div>\
-\
-  <p class="small">Tip: On phones, swipe <strong>right</strong> for Same and <strong>left</strong> for Different.</p>\
-</div>\
-\
-<div id="end" class="container">\
-  <h3>Task Complete</h3>\
-  <p>Thank you for completing the task.</p>\
-  <hr>\
-  <p class="small">\
-    <strong>Researcher use:</strong> Click the button below to download the results file (CSV).<br>\
-    (If you are a participant, you can ignore this.)\
-  </p>\
-  <button class="primary" onclick="downloadCSV()">Download Results (CSV)</button>\
-</div>\
-\
-<div id="overlay" class="overlay" aria-modal="true" role="dialog">\
-  <div class="overlay-box" id="overlayBox">\
-    <div class="tag">Notice</div>\
-    <h3 id="overlayTitle" style="margin:0 0 8px 0;"></h3>\
-    <p id="overlayBody" style="margin:6px 0;color:var(--text)"></p>\
-    <p style="margin:10px 0 0 0;"><strong id="overlayFooter"></strong></p>\
-    <p class="small" style="margin-top:10px;">(Tap this message box or press SPACE to continue.)</p>\
-  </div>\
-</div>\
-\
-<script>\
-/* =========================\
-   DESIGN (what this measures)\
-   =========================\
-   This task primarily taps:\
-   - Visual scanning / discrimination under time pressure\
-   - Response speed + accuracy\
-   - Sustained attention (two halves)\
-   - Interruption / re-engagement cost (block 2 notifications)\
-*/\
-\
-/* ========= TIMING ========= */\
-const HALF_DURATION_MS = 45000; // 45 sec per half\
-const BREAK_DURATION_MS = 10000; // 10 sec break\
-const INTERRUPT_AT_MS = [15000, 30000]; // within each interrupt half\
-\
-/* ========= STIMULI ========= */\
-const PALETTE = ["#6B8CFF","#5EC2B7","#F2A7C3","#F5C16C","#A78BFA","#7BC6FF","#6FCF97","#FFB4A2"];\
-const SHAPES = ["star5","triangle","square","diamond","hexagon","bolt","heart","plus","xmark","arrowRight","crown"];\
-function rand(arr)\{ return arr[Math.floor(Math.random()*arr.length)]; \}\
-function randDiff(arr, x)\{ return rand(arr.filter(v=>v!==x)); \}\
-\
-/* ========= EXPERIMENT STRUCTURE =========\
-   B1 = baseline (no interruptions)\
-   B2 = interrupt (notifications)\
-   Each has Half A and Half B\
-*/\
-const phases = [\
-  \{ key:"B1A", label:"Block 1 \'97 Half A", condition:"baseline", interrupt:false \},\
-  \{ key:"BREAK1", break:true \},\
-  \{ key:"B1B", label:"Block 1 \'97 Half B", condition:"baseline", interrupt:false \},\
-  \{ key:"BREAK2", break:true \},\
-  \{ key:"B2A", label:"Block 2 \'97 Half A", condition:"interrupt", interrupt:true \},\
-  \{ key:"BREAK3", break:true \},\
-  \{ key:"B2B", label:"Block 2 \'97 Half B", condition:"interrupt", interrupt:true \}\
-];\
-\
-/* ========= STATE ========= */\
-let participantId = (crypto?.randomUUID) ? crypto.randomUUID() : ("p_" + Math.random().toString(16).slice(2));\
-let phaseIndex = 0;\
-let phaseStart = 0;\
-let rafId = null;\
-\
-let overlayActive = false;\
-let overlayMode = null; // "notification" | "break"\
-let interruptIdx = 0;\
-let lastInterruptAt = null; // timestamp ms when overlay appeared\
-\
-let currentIsSame = true;\
-let currentLeft = null;\
-let currentRight = null;\
-let trialStart = 0;\
-\
-let trialCounters = \{\}; // per phase: \{n:0\}\
-let trials = [];        // full trial-level data rows\
-let events = [];        // overlay/break events for audit\
-\
-/* ========= UI helpers ========= */\
-const $ = (id) => document.getElementById(id);\
-\
-function setPhaseUI(p)\{\
-  $("phaseLabel").textContent = p.label;\
-  $("conditionLabel").textContent = (p.condition === "baseline") ? "Baseline" : "Interruption";\
-\}\
-\
-/* ========= START ========= */\
-function startExperiment()\{\
-  $("intro").style.display = "none";\
-  $("task").style.display = "block";\
-  phaseIndex = 0;\
-  nextPhase();\
-\}\
-\
-/* ========= PHASE CONTROL ========= */\
-function nextPhase()\{\
-  if(rafId) cancelAnimationFrame(rafId);\
-\
-  if(phaseIndex >= phases.length)\{\
-    endTask();\
-    return;\
-  \}\
-\
-  const p = phases[phaseIndex];\
-\
-  if(p.break)\{\
-    runBreak();\
-    return;\
-  \}\
-\
-  // init per-phase counters\
-  if(!trialCounters[p.key]) trialCounters[p.key] = \{ n:0 \};\
-\
-  setPhaseUI(p);\
-  phaseStart = performance.now();\
-  interruptIdx = 0;\
-  lastInterruptAt = null;\
-\
-  // start trials\
-  showTrial();\
-\
-  // schedule automatic end of phase\
-  setTimeout(() => \{\
-    phaseIndex++;\
-    nextPhase();\
-  \}, HALF_DURATION_MS);\
-\
-  rafId = requestAnimationFrame(updateTimer);\
-\}\
-\
-function updateTimer()\{\
-  const elapsed = performance.now() - phaseStart;\
-  const remaining = Math.max(0, Math.ceil((HALF_DURATION_MS - elapsed) / 1000));\
-  $("timeLeft").textContent = remaining;\
-\
-  const p = phases[phaseIndex];\
-  if(p && p.interrupt && !overlayActive && interruptIdx < INTERRUPT_AT_MS.length && elapsed >= INTERRUPT_AT_MS[interruptIdx])\{\
-    showNotification();\
-    interruptIdx++;\
-  \}\
-\
-  rafId = requestAnimationFrame(updateTimer);\
-\}\
-\
-/* ========= BREAK ========= */\
-function runBreak()\{\
-  showOverlay("Break", "Take a short break.", "Resuming shortly\'85", "break");\
-\
-  events.push(\{\
-    type:"break_start",\
-    ts_iso: new Date().toISOString(),\
-    phase: phases[phaseIndex-1]?.key || "",\
-  \});\
-\
-  setTimeout(() => \{\
-    hideOverlay();\
-    events.push(\{\
-      type:"break_end",\
-      ts_iso: new Date().toISOString(),\
-      phase: phases[phaseIndex-1]?.key || "",\
-    \});\
-\
-    phaseIndex++;\
-    nextPhase();\
-  \}, BREAK_DURATION_MS);\
-\}\
-\
-/* ========= INTERRUPTION OVERLAY ========= */\
-function showNotification()\{\
-  lastInterruptAt = performance.now();\
-  showOverlay("\uc0\u55357 \u56553  New Message", "You have a new message.", "Tap the message box or press SPACE to continue.", "notification");\
-\
-  events.push(\{\
-    type:"notification_shown",\
-    ts_iso: new Date().toISOString(),\
-    phase: phases[phaseIndex]?.key || "",\
-    elapsed_ms_in_phase: Math.round(performance.now() - phaseStart)\
-  \});\
-\}\
-\
-function showOverlay(title, body, footer, mode)\{\
-  overlayActive = true;\
-  overlayMode = mode;\
-  $("overlayTitle").textContent = title;\
-  $("overlayBody").textContent = body;\
-  $("overlayFooter").textContent = footer;\
-  $("overlay").style.display = "flex";\
-\}\
-\
-function hideOverlay()\{\
-  overlayActive = false;\
-  overlayMode = null;\
-  $("overlay").style.display = "none";\
-\
-  events.push(\{\
-    type:"overlay_dismissed",\
-    mode: overlayMode,\
-    ts_iso: new Date().toISOString(),\
-    phase: phases[phaseIndex]?.key || ""\
-  \});\
-\}\
-\
-// Block background taps (do nothing)\
-$("overlay").addEventListener("click", (e)=>\{ e.preventDefault(); e.stopPropagation(); \}, \{passive:false\});\
-$("overlay").addEventListener("touchend", (e)=>\{ e.preventDefault(); e.stopPropagation(); \}, \{passive:false\});\
-\
-// Only box dismisses notifications (deliberate tap)\
-$("overlayBox").addEventListener("click", (e)=>\{\
-  e.preventDefault(); e.stopPropagation();\
-  if(overlayActive && overlayMode === "notification")\{\
-    events.push(\{\
-      type:"notification_dismissed",\
-      ts_iso: new Date().toISOString(),\
-      phase: phases[phaseIndex]?.key || "",\
-      time_to_dismiss_ms: lastInterruptAt ? Math.round(performance.now() - lastInterruptAt) : null\
-    \});\
-    hideOverlay();\
-  \}\
-\}, \{passive:false\});\
-\
-$("overlayBox").addEventListener("touchend", (e)=>\{\
-  e.preventDefault(); e.stopPropagation();\
-  if(overlayActive && overlayMode === "notification")\{\
-    events.push(\{\
-      type:"notification_dismissed",\
-      ts_iso: new Date().toISOString(),\
-      phase: phases[phaseIndex]?.key || "",\
-      time_to_dismiss_ms: lastInterruptAt ? Math.round(performance.now() - lastInterruptAt) : null\
-    \});\
-    hideOverlay();\
-  \}\
-\}, \{passive:false\});\
-\
-/* ========= KEYBOARD INPUT ========= */\
-document.addEventListener("keydown", (e) => \{\
-  if(overlayActive && e.code === "Space")\{\
-    if(overlayMode === "notification")\{\
-      events.push(\{\
-        type:"notification_dismissed",\
-        ts_iso: new Date().toISOString(),\
-        phase: phases[phaseIndex]?.key || "",\
-        time_to_dismiss_ms: lastInterruptAt ? Math.round(performance.now() - lastInterruptAt) : null,\
-        via:"space"\
-      \});\
-      hideOverlay();\
-    \}\
-    return;\
-  \}\
-  if(overlayActive) return;\
-\
-  const k = e.key.toLowerCase();\
-  if(k === "s") handleResponse(true);\
-  if(k === "d") handleResponse(false);\
-\});\
-\
-/* ========= SWIPE INPUT ========= */\
-let touchStartX=null, touchStartY=null;\
-\
-document.addEventListener("touchstart", (e) => \{\
-  if(overlayActive) return;\
-  const t = e.touches[0];\
-  touchStartX = t.clientX;\
-  touchStartY = t.clientY;\
-\}, \{passive:true\});\
-\
-document.addEventListener("touchend", (e) => \{\
-  if(touchStartX === null || overlayActive) return;\
-  const t = e.changedTouches[0];\
-  const dx = t.clientX - touchStartX;\
-  const dy = t.clientY - touchStartY;\
-\
-  if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy))\{\
-    // right = same, left = different\
-    handleResponse(dx > 0);\
-  \}\
-\
-  touchStartX=null; touchStartY=null;\
-\}, \{passive:true\});\
-\
-/* ========= TRIAL GENERATION ========= */\
-function showTrial()\{\
-  const p = phases[phaseIndex];\
-  if(!p || p.break) return;\
-\
-  currentIsSame = Math.random() < 0.5;\
-\
-  const baseShape = rand(SHAPES);\
-  const baseColor = rand(PALETTE);\
-\
-  currentLeft = \{ shape: baseShape, color: baseColor \};\
-\
-  if(currentIsSame)\{\
-    currentRight = \{ shape: baseShape, color: baseColor \};\
-  \} else \{\
-    currentRight = \{ shape: randDiff(SHAPES, baseShape), color: rand(PALETTE) \};\
-  \}\
-\
-  drawStimulus("left", currentLeft);\
-  drawStimulus("right", currentRight);\
-\
-  // re-trigger fade quickly without delay\
-  const row = $("stimRow");\
-  row.classList.remove("fade"); void row.offsetWidth; row.classList.add("fade");\
-\
-  trialStart = performance.now();\
-\}\
-\
-/* ========= RESPONSE + LOGGING ========= */\
-function handleResponse(responseIsSame)\{\
-  const p = phases[phaseIndex];\
-  if(!p || p.break || overlayActive) return;\
-\
-  const rt = Math.max(0, Math.round(performance.now() - trialStart));\
-  const correct = (responseIsSame === currentIsSame);\
-\
-  const trialN = (++trialCounters[p.key].n);\
-  const now = performance.now();\
-\
-  const afterInterrupt = (lastInterruptAt !== null) ? (trialStart >= lastInterruptAt) : false;\
-  // More strict: whether *this response* occurred after the last interrupt appeared\
-  const responseAfterInterrupt = (lastInterruptAt !== null) ? (now >= lastInterruptAt) : false;\
-\
-  trials.push(\{\
-    pid: participantId,\
-    ts_iso: new Date().toISOString(),\
-    phase: p.key,\
-    condition: p.condition,\
-    interrupt: p.interrupt ? 1 : 0,\
-\
-    trial_in_phase: trialN,\
-    isSame: currentIsSame ? 1 : 0,\
-    responseSame: responseIsSame ? 1 : 0,\
-    correct: correct ? 1 : 0,\
-    rt_ms: rt,\
-\
-    left_shape: currentLeft.shape,\
-    right_shape: currentRight.shape,\
-\
-    // analysis helpers\
-    after_interrupt_trialStart: afterInterrupt ? 1 : 0,\
-    after_interrupt_response: responseAfterInterrupt ? 1 : 0,\
-    ms_since_last_interrupt: (lastInterruptAt !== null) ? Math.round(trialStart - lastInterruptAt) : ""\
-  \});\
-\
-  showTrial();\
-\}\
-\
-/* ========= DRAWING ========= */\
-function drawStimulus(canvasId, stim)\{\
-  const c = document.getElementById(canvasId);\
-  const ctx = c.getContext("2d");\
-  ctx.clearRect(0,0,c.width,c.height);\
-\
-  // subtle background\
-  ctx.fillStyle = "rgba(107,140,255,0.06)";\
-  ctx.fillRect(0,0,c.width,c.height);\
-\
-  ctx.lineWidth = 7;\
-  ctx.strokeStyle = "#1f2933";\
-  ctx.fillStyle = stim.color;\
-\
-  ctx.save();\
-  ctx.translate(c.width/2, c.height/2 + 5);\
-\
-  switch(stim.shape)\{\
-    case "triangle": drawTriangle(ctx); break;\
-    case "square": drawSquare(ctx); break;\
-    case "diamond": drawDiamond(ctx); break;\
-    case "hexagon": drawHexagon(ctx); break;\
-    case "star5": drawStar5(ctx); break;\
-    case "bolt": drawBolt(ctx); break;\
-    case "heart": drawHeart(ctx); break;\
-    case "plus": drawPlus(ctx); break;\
-    case "xmark": drawX(ctx); break;\
-    case "arrowRight": drawArrowRight(ctx); break;\
-    case "crown": drawCrown(ctx); break;\
-  \}\
-\
-  ctx.restore();\
-\}\
-\
-function drawTriangle(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(0,-78); ctx.lineTo(78,60); ctx.lineTo(-78,60);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawSquare(ctx)\{\
-  ctx.beginPath();\
-  ctx.rect(-72,-72,144,144);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawDiamond(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(0,-84); ctx.lineTo(84,0); ctx.lineTo(0,84); ctx.lineTo(-84,0);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawHexagon(ctx)\{\
-  const r=82;\
-  ctx.beginPath();\
-  for(let i=0;i<6;i++)\{\
-    const a=(Math.PI/3)*i - Math.PI/6;\
-    const x=r*Math.cos(a), y=r*Math.sin(a);\
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);\
-  \}\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawStar5(ctx)\{\
-  const outer=84, inner=36;\
-  ctx.beginPath();\
-  for(let i=0;i<10;i++)\{\
-    const r = (i%2===0) ? outer : inner;\
-    const a = (Math.PI/5)*i - Math.PI/2;\
-    const x=r*Math.cos(a), y=r*Math.sin(a);\
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);\
-  \}\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawBolt(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(-22,-86);\
-  ctx.lineTo(34,-22);\
-  ctx.lineTo(8,-22);\
-  ctx.lineTo(38,86);\
-  ctx.lineTo(-38,18);\
-  ctx.lineTo(-8,18);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawHeart(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(0,78);\
-  ctx.bezierCurveTo(86,18,68,-78,0,-28);\
-  ctx.bezierCurveTo(-68,-78,-86,18,0,78);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawPlus(ctx)\{\
-  ctx.beginPath();\
-  ctx.rect(-20,-84,40,168);\
-  ctx.rect(-84,-20,168,40);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawX(ctx)\{\
-  ctx.save(); ctx.rotate(Math.PI/4);\
-  drawPlus(ctx);\
-  ctx.restore();\
-\}\
-function drawArrowRight(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(-86,-22);\
-  ctx.lineTo(30,-22);\
-  ctx.lineTo(30,-56);\
-  ctx.lineTo(92,0);\
-  ctx.lineTo(30,56);\
-  ctx.lineTo(30,22);\
-  ctx.lineTo(-86,22);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-function drawCrown(ctx)\{\
-  ctx.beginPath();\
-  ctx.moveTo(-90,70);\
-  ctx.lineTo(-68,-10);\
-  ctx.lineTo(-26,30);\
-  ctx.lineTo(0,-60);\
-  ctx.lineTo(26,30);\
-  ctx.lineTo(68,-10);\
-  ctx.lineTo(90,70);\
-  ctx.closePath(); ctx.fill(); ctx.stroke();\
-\}\
-\
-/* ========= END / EXPORT ========= */\
-function endTask()\{\
-  $("task").style.display = "none";\
-  $("end").style.display = "block";\
-\
-  // record end marker\
-  events.push(\{\
-    type:"task_end",\
-    ts_iso: new Date().toISOString(),\
-    trials_count: trials.length\
-  \});\
-\}\
-\
-function downloadCSV()\{\
-  // Convert trials + events to CSV (two sections in one file)\
-  const lines = [];\
-\
-  lines.push("### TRIALS ###");\
-  lines.push(Object.keys(trials[0] || \{\
-    pid:"",ts_iso:"",phase:"",condition:"",interrupt:"",trial_in_phase:"",\
-    isSame:"",responseSame:"",correct:"",rt_ms:"",\
-    left_shape:"",right_shape:"",\
-    after_interrupt_trialStart:"",after_interrupt_response:"",\
-    ms_since_last_interrupt:""\
-  \}).join(","));\
-\
-  for(const t of trials)\{\
-    lines.push(Object.keys(trials[0] || t).map(k => csvEscape(t[k])).join(","));\
-  \}\
-\
-  lines.push("");\
-  lines.push("### EVENTS ###");\
-  lines.push(Object.keys(events[0] || \{type:"",ts_iso:"",phase:"",elapsed_ms_in_phase:""\}).join(","));\
-\
-  for(const ev of events)\{\
-    lines.push(Object.keys(events[0] || ev).map(k => csvEscape(ev[k])).join(","));\
-  \}\
-\
-  const blob = new Blob([lines.join("\\n")], \{ type: "text/csv;charset=utf-8" \});\
-  const url = URL.createObjectURL(blob);\
-\
-  const a = document.createElement("a");\
-  a.href = url;\
-  a.download = `vpst_$\{participantId\}.csv`;\
-  document.body.appendChild(a);\
-  a.click();\
-  a.remove();\
-  URL.revokeObjectURL(url);\
-\}\
-\
-function csvEscape(v)\{\
-  if(v === null || v === undefined) return "";\
-  const s = String(v);\
-  if(/[",\\n]/.test(s)) return `"$\{s.replace(/"/g,'""')\}"`;\
-  return s;\
-\}\
-</script>\
-</body>\
-</html>\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>VPST — Visual Processing Speed Task</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --border:#8b95a5;
+  --accent:#6b8cff; --accent2:#5ec2b7;
+  --text:#1f2933; --muted:#5f6c7b;
 }
+body{
+  margin:0; padding:26px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg); color:var(--text); text-align:center;
+}
+h2{ margin:0 0 10px 0; }
+p{ color:var(--muted); }
+.container{ display:none; }
+button{
+  padding:12px 18px; border-radius:12px; border:none;
+  font-size:16px; cursor:pointer;
+}
+.primary{ background:var(--accent); color:#fff; }
+.secondary{ background:var(--accent2); color:#fff; }
+button:hover{ opacity:.92; }
+.hud{
+  display:flex; justify-content:space-between; align-items:center;
+  max-width:780px; margin:0 auto; font-weight:750;
+}
+.row{
+  display:flex; justify-content:center; gap:30px;
+  margin:18px 0;
+}
+.card{
+  width:250px; height:250px; background:var(--card);
+  border-radius:18px; border:2px solid var(--border);
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+  display:flex; align-items:center; justify-content:center;
+}
+canvas{ width:210px; height:210px; }
+.controls{ display:flex; justify-content:center; gap:16px; margin-top:12px; }
+.small{
+  font-size:13px; line-height:1.35; color:var(--muted);
+  max-width:760px; margin:10px auto 0 auto;
+}
+hr{ border:none; border-top:1px solid rgba(139,149,165,.35); margin:18px auto; max-width:780px; }
+
+.overlay{
+  position:fixed; inset:0; background:rgba(31,41,51,.62);
+  display:none; justify-content:center; align-items:center; z-index:999;
+  touch-action:none;
+}
+.overlay-box{
+  background:#fff; padding:20px; border-radius:14px;
+  width:410px; text-align:left;
+  box-shadow:0 12px 28px rgba(0,0,0,.25);
+  border:2px solid rgba(139,149,165,.6);
+}
+.tag{
+  display:inline-block; font-size:12px; padding:4px 8px;
+  border-radius:999px; background:rgba(107,140,255,.12);
+  color:#2743b6; margin-bottom:10px;
+}
+.fade{ animation:fadeIn .10s ease-in; }
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+</style>
+</head>
+
+<body>
+<h2>Visual Processing Speed Task</h2>
+
+<div id="intro">
+  <p>
+    You will see two symbols side by side. Decide as quickly and accurately as possible whether they are the <strong>same</strong> or <strong>different</strong>.
+  </p>
+  <p class="small">
+    <strong>How to respond:</strong><br>
+    • <strong>Keyboard:</strong> S = Same, D = Different<br>
+    • <strong>Touch:</strong> Swipe right = Same, Swipe left = Different<br>
+    • <strong>Buttons:</strong> Tap Same / Different
+  </p>
+  <p class="small">Brief on-screen messages may appear. Short breaks are built in. The task takes only a few minutes.</p>
+  <button class="primary" onclick="start()">Start</button>
+</div>
+
+<div id="task" class="container">
+  <div class="hud">
+    <div>
+      <span id="phaseLabel">Practice</span>
+      <span style="font-weight:650;color:var(--muted)"> · </span>
+      <span id="condLabel" style="font-weight:800;color:var(--muted)">Not scored</span>
+    </div>
+    <div id="timerBox">⏱ <span id="timeLeft">—</span></div>
+  </div>
+
+  <div class="row fade" id="stimRow">
+    <div class="card"><canvas id="left" width="210" height="210"></canvas></div>
+    <div class="card"><canvas id="right" width="210" height="210"></canvas></div>
+  </div>
+
+  <div class="controls">
+    <button class="secondary" onclick="respond(true)">Same</button>
+    <button class="secondary" onclick="respond(false)">Different</button>
+  </div>
+
+  <p class="small">Tip: Swipe <strong>right</strong> for Same and <strong>left</strong> for Different.</p>
+</div>
+
+<div id="end" class="container">
+  <h3 id="endTitle">Thank you</h3>
+  <p id="endMsg" class="small"></p>
+  <hr>
+  <p class="small"><strong>Status:</strong> <span id="submitStatus">Saving…</span></p>
+</div>
+
+<div id="overlay" class="overlay" role="dialog" aria-modal="true">
+  <div class="overlay-box" id="overlayBox">
+    <div class="tag">Notice</div>
+    <h3 id="overlayTitle" style="margin:0 0 8px 0;"></h3>
+    <p id="overlayBody" style="margin:6px 0; color:var(--text);"></p>
+    <p style="margin:10px 0 0 0;"><strong id="overlayFooter"></strong></p>
+    <p class="small" style="margin-top:10px;">(Tap this message box or press SPACE to continue.)</p>
+  </div>
+</div>
+
+<script>
+/* =========================
+   GOOGLE FORM CONFIG
+   =========================
+   1) Create a Google Form with short-answer fields
+   2) Get each field’s entry ID (entry.#########)
+   3) Paste them below
+*/
+const FORM_ACTION_URL = "https://docs.google.com/forms/d/e/PASTE_YOUR_FORM_ID_HERE/formResponse";
+
+// Replace each entry ID with your own from the prefilled-link URL.
+const FORM_ENTRY = {
+  participant_id: "entry.1111111111",
+  completed:      "entry.2222222222",
+  device_summary: "entry.3333333333",
+  A_summary:      "entry.4444444444",
+  B_summary:      "entry.5555555555",
+  C_summary:      "entry.6666666666",
+  D_summary:      "entry.7777777777",
+  trial_json:     "entry.8888888888"
+};
+
+/* =========================
+   TASK DESIGN
+   ========================= */
+const HALF_MS = 45000;
+const BREAK_MS = 10000;
+
+// Interruptions only in parts C and D (two notifications per half)
+const INTERRUPT_AT_MS = [15000, 30000];
+
+// Stimuli palette (color is aesthetic, not sole cue)
+const PALETTE = ["#6B8CFF","#5EC2B7","#F2A7C3","#F5C16C","#A78BFA","#7BC6FF","#6FCF97","#FFB4A2"];
+const SHAPES = ["star5","triangle","square","diamond","hexagon","bolt","heart","plus","xmark","arrowRight","crown"];
+
+const phases = [
+  { key:"PRACTICE", label:"Let’s try this out (Practice)", condition:"practice", timed:false, interrupt:false, scored:false, nPractice:3 },
+
+  { key:"BREAK_P", break:true, label:"Break" },
+
+  { key:"A", label:"Part A", condition:"no_distraction", timed:true, interrupt:false, scored:true },
+  { key:"BREAK_A", break:true, label:"Break" },
+
+  { key:"B", label:"Part B", condition:"no_distraction", timed:true, interrupt:false, scored:true },
+  { key:"BREAK_B", break:true, label:"Break" },
+
+  { key:"C", label:"Part C", condition:"interruption", timed:true, interrupt:true, scored:true },
+  { key:"BREAK_C", break:true, label:"Break" },
+
+  { key:"D", label:"Part D", condition:"interruption", timed:true, interrupt:true, scored:true }
+];
+
+/* =========================
+   STATE
+   ========================= */
+const $ = (id)=>document.getElementById(id);
+const pid = (crypto?.randomUUID) ? crypto.randomUUID() : ("p_" + Math.random().toString(16).slice(2));
+
+let phaseIndex = 0;
+let phaseStart = 0;
+let timerRAF = null;
+
+let overlayActive = false;
+let overlayMode = null; // "notification" | "break"
+let interruptIdx = 0;
+let lastInterruptAt = null;
+
+let currentIsSame = true;
+let stimL = null, stimR = null;
+let trialStart = 0;
+
+let practiceCount = 0;
+let practiceWrong = 0;
+
+let trials = [];   // trial-level data
+let events = [];   // notification/break audit
+
+/* =========================
+   INPUT: keyboard + swipe
+   ========================= */
+document.addEventListener("keydown", (e)=>{
+  if(overlayActive && e.code === "Space"){
+    if(overlayMode === "notification") dismissNotification("space");
+    return;
+  }
+  if(overlayActive) return;
+  const k = e.key.toLowerCase();
+  if(k==="s") respond(true);
+  if(k==="d") respond(false);
+});
+
+let touchStartX=null, touchStartY=null;
+document.addEventListener("touchstart",(e)=>{
+  if(overlayActive) return;
+  const t=e.touches[0]; touchStartX=t.clientX; touchStartY=t.clientY;
+},{passive:true});
+document.addEventListener("touchend",(e)=>{
+  if(touchStartX===null || overlayActive) return;
+  const t=e.changedTouches[0];
+  const dx=t.clientX-touchStartX, dy=t.clientY-touchStartY;
+  if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+    respond(dx>0); // right same; left diff
+  }
+  touchStartX=null; touchStartY=null;
+},{passive:true});
+
+/* =========================
+   OVERLAY handling
+   ========================= */
+$("overlay").addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); },{passive:false});
+$("overlay").addEventListener("touchend",(e)=>{ e.preventDefault(); e.stopPropagation(); },{passive:false});
+
+$("overlayBox").addEventListener("click",(e)=>{
+  e.preventDefault(); e.stopPropagation();
+  if(overlayActive && overlayMode==="notification") dismissNotification("tap");
+},{passive:false});
+$("overlayBox").addEventListener("touchend",(e)=>{
+  e.preventDefault(); e.stopPropagation();
+  if(overlayActive && overlayMode==="notification") dismissNotification("tap");
+},{passive:false});
+
+function showOverlay(title, body, footer, mode){
+  overlayActive=true; overlayMode=mode;
+  $("overlayTitle").textContent=title;
+  $("overlayBody").textContent=body;
+  $("overlayFooter").textContent=footer;
+  $("overlay").style.display="flex";
+}
+function hideOverlay(){
+  overlayActive=false; overlayMode=null;
+  $("overlay").style.display="none";
+}
+function showNotification(){
+  lastInterruptAt = performance.now();
+  showOverlay("📩 New Message", "You have a new message.", "Tap the message box or press SPACE to continue.", "notification");
+  events.push({type:"notification_shown", ts_iso:new Date().toISOString(), phase:phases[phaseIndex].key, elapsed_ms:Math.round(performance.now()-phaseStart)});
+}
+function dismissNotification(via){
+  events.push({type:"notification_dismissed", ts_iso:new Date().toISOString(), phase:phases[phaseIndex].key, via});
+  hideOverlay();
+}
+function showBreak(){
+  showOverlay("Break", "Take a short break.", "Resuming shortly…", "break");
+}
+
+/* =========================
+   START / FLOW
+   ========================= */
+function start(){
+  $("intro").style.display="none";
+  $("task").style.display="block";
+  phaseIndex=0;
+  runPhase();
+}
+
+function runPhase(){
+  if(timerRAF) cancelAnimationFrame(timerRAF);
+  if(phaseIndex>=phases.length){ finish(true); return; }
+
+  const p = phases[phaseIndex];
+
+  if(p.break){
+    $("phaseLabel").textContent="Break";
+    $("condLabel").textContent=" ";
+    $("timerBox").style.visibility="hidden";
+    showBreak();
+
+    events.push({type:"break_start", ts_iso:new Date().toISOString(), from_phase: phases[phaseIndex-1]?.key || ""});
+
+    setTimeout(()=>{
+      hideOverlay();
+      events.push({type:"break_end", ts_iso:new Date().toISOString(), from_phase: phases[phaseIndex-1]?.key || ""});
+      phaseIndex++;
+      runPhase();
+    }, BREAK_MS);
+
+    return;
+  }
+
+  // regular phase
+  $("phaseLabel").textContent = p.label;
+  $("condLabel").textContent = (p.condition==="practice") ? "Not scored" : (p.condition==="no_distraction" ? "No interruption" : "Interruption");
+  $("timerBox").style.visibility = p.timed ? "visible" : "hidden";
+  $("timeLeft").textContent = p.timed ? String(Math.ceil(HALF_MS/1000)) : "—";
+
+  phaseStart = performance.now();
+  interruptIdx = 0;
+  lastInterruptAt = null;
+
+  // Practice setup
+  if(p.key==="PRACTICE"){
+    practiceCount=0; practiceWrong=0;
+  }
+
+  // first trial
+  showTrial();
+  if(p.timed){
+    setTimeout(()=>{
+      phaseIndex++;
+      runPhase();
+    }, HALF_MS);
+    timerRAF=requestAnimationFrame(updateTimer);
+  }
+}
+
+function updateTimer(){
+  const p = phases[phaseIndex];
+  if(!p || !p.timed) return;
+
+  const elapsed = performance.now() - phaseStart;
+  const remaining = Math.max(0, Math.ceil((HALF_MS - elapsed)/1000));
+  $("timeLeft").textContent = remaining;
+
+  if(p.interrupt && !overlayActive && interruptIdx < INTERRUPT_AT_MS.length && elapsed >= INTERRUPT_AT_MS[interruptIdx]){
+    showNotification();
+    interruptIdx++;
+  }
+  timerRAF=requestAnimationFrame(updateTimer);
+}
+
+/* =========================
+   TRIAL GENERATION
+   ========================= */
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randDiff(arr, x){ return rand(arr.filter(v=>v!==x)); }
+
+function showTrial(){
+  const p = phases[phaseIndex];
+  if(!p || p.break) return;
+
+  currentIsSame = Math.random() < 0.5;
+
+  const baseShape = rand(SHAPES);
+  const baseColor = rand(PALETTE);
+
+  stimL = {shape:baseShape, color:baseColor};
+
+  if(currentIsSame){
+    stimR = {shape:baseShape, color:baseColor};
+  } else {
+    stimR = {shape:randDiff(SHAPES, baseShape), color:rand(PALETTE)};
+  }
+
+  drawStimulus("left", stimL);
+  drawStimulus("right", stimR);
+
+  const row=$("stimRow");
+  row.classList.remove("fade"); void row.offsetWidth; row.classList.add("fade");
+
+  trialStart = performance.now();
+}
+
+/* =========================
+   RESPONSE + LOGGING
+   ========================= */
+function respond(respSame){
+  const p = phases[phaseIndex];
+  if(!p || p.break || overlayActive) return;
+
+  const rt = Math.max(0, Math.round(performance.now() - trialStart));
+  const correct = (respSame === currentIsSame);
+
+  const now = performance.now();
+  const afterInterrupt = (lastInterruptAt!==null) ? (trialStart >= lastInterruptAt) : false;
+  const msSinceInterrupt = (lastInterruptAt!==null) ? Math.round(trialStart - lastInterruptAt) : "";
+
+  trials.push({
+    pid,
+    ts_iso: new Date().toISOString(),
+    phase: p.key,
+    condition: p.condition,
+    interrupt: p.interrupt ? 1 : 0,
+    scored: p.scored ? 1 : 0,
+
+    isSame: currentIsSame ? 1 : 0,
+    responseSame: respSame ? 1 : 0,
+    correct: correct ? 1 : 0,
+    rt_ms: rt,
+
+    left_shape: stimL.shape,
+    right_shape: stimR.shape,
+
+    after_interrupt_trialStart: afterInterrupt ? 1 : 0,
+    ms_since_last_interrupt: msSinceInterrupt
+  });
+
+  // PRACTICE discontinuation rule (2/3 wrong => stop)
+  if(p.key==="PRACTICE"){
+    practiceCount++;
+    if(!correct) practiceWrong++;
+
+    if(practiceCount >= p.nPractice){
+      if(practiceWrong >= 2){
+        // discontinue
+        finish(false);
+        return;
+      } else {
+        // proceed to next phase (break then Part A)
+        phaseIndex++;
+        runPhase();
+        return;
+      }
+    }
+
+    // continue practice
+    showTrial();
+    return;
+  }
+
+  // In timed phases, just continue presenting trials
+  showTrial();
+}
+
+/* =========================
+   DRAWING
+   ========================= */
+function drawStimulus(canvasId, stim){
+  const c=$(canvasId), ctx=c.getContext("2d");
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle="rgba(107,140,255,0.06)";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  ctx.lineWidth=7;
+  ctx.strokeStyle="#1f2933";
+  ctx.fillStyle=stim.color;
+
+  ctx.save();
+  ctx.translate(c.width/2, c.height/2 + 5);
+
+  switch(stim.shape){
+    case "triangle": drawTriangle(ctx); break;
+    case "square": drawSquare(ctx); break;
+    case "diamond": drawDiamond(ctx); break;
+    case "hexagon": drawHexagon(ctx); break;
+    case "star5": drawStar5(ctx); break;
+    case "bolt": drawBolt(ctx); break;
+    case "heart": drawHeart(ctx); break;
+    case "plus": drawPlus(ctx); break;
+    case "xmark": drawX(ctx); break;
+    case "arrowRight": drawArrowRight(ctx); break;
+    case "crown": drawCrown(ctx); break;
+  }
+  ctx.restore();
+}
+function drawTriangle(ctx){ ctx.beginPath(); ctx.moveTo(0,-78); ctx.lineTo(78,60); ctx.lineTo(-78,60); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+function drawSquare(ctx){ ctx.beginPath(); ctx.rect(-72,-72,144,144); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+function drawDiamond(ctx){ ctx.beginPath(); ctx.moveTo(0,-84); ctx.lineTo(84,0); ctx.lineTo(0,84); ctx.lineTo(-84,0); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+function drawHexagon(ctx){
+  const r=82; ctx.beginPath();
+  for(let i=0;i<6;i++){ const a=(Math.PI/3)*i - Math.PI/6; const x=r*Math.cos(a), y=r*Math.sin(a); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawStar5(ctx){
+  const outer=84, inner=36; ctx.beginPath();
+  for(let i=0;i<10;i++){ const r=(i%2===0)?outer:inner; const a=(Math.PI/5)*i - Math.PI/2; const x=r*Math.cos(a), y=r*Math.sin(a); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawBolt(ctx){
+  ctx.beginPath();
+  ctx.moveTo(-22,-86); ctx.lineTo(34,-22); ctx.lineTo(8,-22);
+  ctx.lineTo(38,86); ctx.lineTo(-38,18); ctx.lineTo(-8,18);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawHeart(ctx){
+  ctx.beginPath();
+  ctx.moveTo(0,78);
+  ctx.bezierCurveTo(86,18,68,-78,0,-28);
+  ctx.bezierCurveTo(-68,-78,-86,18,0,78);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawPlus(ctx){
+  ctx.beginPath();
+  ctx.rect(-20,-84,40,168);
+  ctx.rect(-84,-20,168,40);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawX(ctx){ ctx.save(); ctx.rotate(Math.PI/4); drawPlus(ctx); ctx.restore(); }
+function drawArrowRight(ctx){
+  ctx.beginPath();
+  ctx.moveTo(-86,-22); ctx.lineTo(30,-22); ctx.lineTo(30,-56);
+  ctx.lineTo(92,0); ctx.lineTo(30,56); ctx.lineTo(30,22); ctx.lineTo(-86,22);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawCrown(ctx){
+  ctx.beginPath();
+  ctx.moveTo(-90,70); ctx.lineTo(-68,-10); ctx.lineTo(-26,30);
+  ctx.lineTo(0,-60); ctx.lineTo(26,30); ctx.lineTo(68,-10);
+  ctx.lineTo(90,70); ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+
+/* =========================
+   SUMMARY + SUBMIT
+   ========================= */
+function summarizePhase(phaseKey){
+  const rows = trials.filter(t => t.phase===phaseKey && t.scored===1);
+  const n = rows.length;
+  const correct = rows.reduce((a,r)=>a+(r.correct===1?1:0),0);
+  const errors = n - correct;
+  const rts = rows.filter(r=>typeof r.rt_ms==="number" && r.rt_ms>0).map(r=>r.rt_ms).sort((a,b)=>a-b);
+  const meanRT = rts.length ? Math.round(rts.reduce((a,v)=>a+v,0)/rts.length) : "";
+  const medianRT = rts.length ? rts[Math.floor(rts.length/2)] : "";
+  return {n, correct, errors, meanRT, medianRT};
+}
+function deviceSummary(){
+  const ua = navigator.userAgent || "";
+  const w = window.innerWidth, h = window.innerHeight;
+  const isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints>0;
+  return `pid=${pid} | touch=${isTouch} | screen=${w}x${h} | ua=${ua}`;
+}
+function packSummaryText(label, s){
+  return `${label}: n=${s.n}, correct=${s.correct}, errors=${s.errors}, meanRT_ms=${s.meanRT}, medianRT_ms=${s.medianRT}`;
+}
+
+async function submitToGoogleForm(payload){
+  // POST as application/x-www-form-urlencoded
+  const body = new URLSearchParams(payload);
+
+  // no-cors is required for Google Forms POST from a static site
+  await fetch(FORM_ACTION_URL, {
+    method:"POST",
+    mode:"no-cors",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body
+  });
+}
+
+async function finish(completed){
+  if(timerRAF) cancelAnimationFrame(timerRAF);
+  $("task").style.display="none";
+  $("end").style.display="block";
+
+  $("endTitle").textContent = completed ? "Task Complete" : "Thank you";
+  $("endMsg").textContent = completed
+    ? "Thanks for completing the task."
+    : "Thanks for your participation. The task ended early based on practice performance.";
+
+  // Summaries
+  const A = summarizePhase("A");
+  const B = summarizePhase("B");
+  const C = summarizePhase("C");
+  const D = summarizePhase("D");
+
+  const Atext = packSummaryText("A", A);
+  const Btext = packSummaryText("B", B);
+  const Ctext = packSummaryText("C", C);
+  const Dtext = packSummaryText("D", D);
+
+  // Trial-level JSON blob (includes practice trials too, with scored=0)
+  // NOTE: If your runs are very long, Google Form may truncate extremely large text fields.
+  const trialJSON = JSON.stringify({ pid, completed: completed?1:0, trials, events });
+
+  const payload = {};
+  payload[FORM_ENTRY.participant_id] = pid;
+  payload[FORM_ENTRY.completed] = completed ? "1" : "0";
+  payload[FORM_ENTRY.device_summary] = deviceSummary();
+  payload[FORM_ENTRY.A_summary] = Atext;
+  payload[FORM_ENTRY.B_summary] = Btext;
+  payload[FORM_ENTRY.C_summary] = Ctext;
+  payload[FORM_ENTRY.D_summary] = Dtext;
+  payload[FORM_ENTRY.trial_json] = trialJSON;
+
+  // Submit
+  try{
+    await submitToGoogleForm(payload);
+    $("submitStatus").textContent = "Saved.";
+  }catch(e){
+    $("submitStatus").textContent = "Could not confirm save (please notify the researcher).";
+  }
+}
+</script>
+</body>
+</html>
